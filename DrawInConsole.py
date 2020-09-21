@@ -1,13 +1,29 @@
+import time 
 
+from Movement import Movement
 # draw snake game in console
 
 class DrawInConsole:
     # constructor
-    def __init__(self, game):
+    def __init__(self, game, secs):
         self.game = game
+        self.secs = secs
+
+    def draw(self, move, playing, game):
+        self.drawGrid(playing[0])
+
+        while move[0] == Movement.NONE:
+            time.sleep(self.secs)
+
+        while playing[0]:
+            time.sleep(self.secs)
+            self.drawGrid(playing[0])
+
+        print("score : " + str(game.score))
+        print("snake len : " + str(game.lenOfSnake()))
 
     # draw game's current state
-    def drawGameInConsole(self, playing):
+    def drawGrid(self, playing):
         verticalBorder = "#"
         horizontalBorder = "#"
 

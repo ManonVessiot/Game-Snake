@@ -8,56 +8,65 @@ import threading
 from Movement import Movement
 from SnakeGame import SnakeGame
 from DrawInConsole import DrawInConsole
+from DrawWithTkinter import DrawWithTkinter
 
-# play snake and draw it in console
-def playInConsole():
+def play():
     global width
     global height
     global secs
-    global move
-    global playing
+    global moveRef
+    global playingRef
+    global game
 
-    game = SnakeGame(width, height)
-    drawer = DrawInConsole(game)
-    drawer.drawGameInConsole(True)
 
-    while move == Movement.NONE:
+    while moveRef[0] == Movement.NONE:
+        #print("waiting for moveRef[0]")
         time.sleep(secs)
 
-    playing = True
-    while playing:
+    #print("start playing")
+    playingRef[0] = True
+    while playingRef[0]:
         time.sleep(secs)
-        playing = playingTurn(game)
-        drawer.drawGameInConsole(playing)
-    print("score : " + str(game.score))
-    print("snake len : " + str(game.lenOfSnake()))
+        playingRef[0] = playingTurn(game)
+  #  print("stop playingRef[0]")
 
 # playing a turn in snake (make a move)
 def playingTurn(game):
-    global move
+    global moveRef
+
+   # print("playing")
     
-    playing = game.moveSnake(move)
+    playing = game.moveSnake(moveRef[0])
     return playing
+
+# draw game
+def draw(drawer):
+    global moveRef
+    global playingRef
+    global secs
+
+    drawer.draw(moveRef, playingRef, game)
+
 
 # change move on key press
 def moveEvents():
-    global move
-    global playing
+    global moveRef
+    global playingRef
 
-    while playing:
+    while playingRef[0]:
         # The event listener will be running in this block
         with keyboard.Events() as events:
             # Block at most one second
             event = events.get()
             if event is not None and isinstance(event, keyboard.Events.Press):
                 if event.key == keyboard.Key.left:
-                    move = Movement.LEFT
+                    moveRef[0] = Movement.LEFT
                 elif event.key == keyboard.Key.up:
-                    move = Movement.UP
+                    moveRef[0] = Movement.UP
                 elif event.key == keyboard.Key.right:
-                    move = Movement.RIGHT
+                    moveRef[0] = Movement.RIGHT
                 elif event.key == keyboard.Key.down:
-                    move = Movement.DOWN
+                    moveRef[0] = Movement.DOWN
 
 # stop program
 def stopProgram():
@@ -67,23 +76,36 @@ def stopProgram():
         os._exit(0)
 
 # globals variables
-width = 20
-height = 10
-secs = 0.25
+posSize = 25
+width = 40
+height = 20
+secs = 0.15
 move = Movement.NONE
+moveRef = [move]
 playing = True
+playingRef = [playing]
+game = SnakeGame(width, height)
+drawMode = 2
 
 if __name__ == '__main__':
     try:
         # change move in thread
-        x = threading.Thread(target=moveEvents, args=())
-        x.start()
-        
-        # play game
-        playInConsole()
+        moveThread = threading.Thread(target=moveEvents, args=())
+        moveThread.start()
 
-        # stop program (stop thread)
-        stopProgram()
+        # play in thread
+        playThread = threading.Thread(target=play, args=())
+        playThread.start()
+
+        if drawMode == 1:
+            # draw console
+            drawerConsole = DrawInConsole(game, secs)
+            draw(drawerConsole)
+        else:
+            # draw console
+            drawerTk = DrawWithTkinter(game, posSize, secs)
+            draw(drawerTk)
+
     except KeyboardInterrupt:
         print('\nInterrupted')
         stopProgram()
