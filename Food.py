@@ -2,46 +2,51 @@ import random
 
 from Snake import Snake
 
+# mange food in grid
+
 class Food:
+    # constructor
     def __init__(self, width, height, snake):
-        self.width = width
-        self.height = height
-        self.snake = snake
+        self._width = width
+        self._height = height
+        self._snake = snake
 
-        self.foodNumberSinceStart = 0
+        self._foodNumberSinceStart = 0
 
-        self.positions = []
-        self.scores = []
-        self.createFood()
-        print("Food")
-        print(self.positions)
+        self._positions = []
+        self._scores = []
+        self._createFood()
 
-    def createFood(self):
+    # create food
+    def _createFood(self):
         isSnake = True
         while isSnake:
-            x = random.randrange(0, self.width)
-            y = random.randrange(0, self.height)
-            if not self.snake.isSnake(x, y) and (x, y) not in self.positions:
+            x = random.randrange(0, self._width)
+            y = random.randrange(0, self._height)
+            if not self._snake.isSnake(x, y) and (x, y) not in self._positions:
                 isSnake = False
 
-        self.foodNumberSinceStart += 1
-        self.positions.append((x, y))
-        self.scores.append(self.createScore())
+        self._foodNumberSinceStart += 1
+        self._positions.append((x, y))
+        self._scores.append(self._createScore())
 
-    def createScore(self):
+    # create score or food
+    def _createScore(self):
         mini = 3
         maxi = 10
-        return random.randrange(mini, max(mini + 1, maxi - self.foodNumberSinceStart))
+        return random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
 
+    # snake try to eat where his head is
     def eatFood(self, x, y):
         score = 0
         if self.isFood(x, y):
-            i = self.positions.index((x, y))
-            score = self.scores[i]
-            self.positions.remove((x, y))
-            self.scores = self.scores[:i] + self.scores[i+1:]
-            self.createFood()
+            i = self._positions.index((x, y))
+            score = self._scores[i]
+            self._positions.remove((x, y))
+            self._scores = self._scores[:i] + self._scores[i+1:]
+            self._createFood()
         return score
 
+    # check if pos si food
     def isFood(self, x, y):
-        return (x, y) in self.positions
+        return (x, y) in self._positions

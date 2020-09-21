@@ -7,7 +7,9 @@ import threading
 
 from Movement import Movement
 from SnakeGame import SnakeGame
+from DrawInConsole import DrawInConsole
 
+# play snake and draw it in console
 def playInConsole():
     global width
     global height
@@ -16,7 +18,8 @@ def playInConsole():
     global playing
 
     game = SnakeGame(width, height)
-    game.draw(True)
+    drawer = DrawInConsole(game)
+    drawer.drawGameInConsole(True)
 
     while move == Movement.NONE:
         time.sleep(secs)
@@ -25,14 +28,18 @@ def playInConsole():
     while playing:
         time.sleep(secs)
         playing = playingTurn(game)
-        game.draw(playing)
+        drawer.drawGameInConsole(playing)
+    print("score : " + str(game.score))
+    print("snake len : " + str(game.lenOfSnake()))
 
+# playing a turn in snake (make a move)
 def playingTurn(game):
     global move
     
     playing = game.moveSnake(move)
     return playing
 
+# change move on key press
 def moveEvents():
     global move
     global playing
@@ -52,6 +59,14 @@ def moveEvents():
                 elif event.key == keyboard.Key.down:
                     move = Movement.DOWN
 
+# stop program
+def stopProgram():
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
+
+# globals variables
 width = 20
 height = 10
 secs = 0.25
@@ -60,13 +75,15 @@ playing = True
 
 if __name__ == '__main__':
     try:
+        # change move in thread
         x = threading.Thread(target=moveEvents, args=())
         x.start()
         
+        # play game
         playInConsole()
+
+        # stop program (stop thread)
+        stopProgram()
     except KeyboardInterrupt:
         print('\nInterrupted')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+        stopProgram()
