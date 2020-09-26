@@ -1,7 +1,5 @@
 import random
 
-from Snake import Snake
-
 # mange food in grid
 
 class Food:

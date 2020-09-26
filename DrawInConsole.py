@@ -1,6 +1,5 @@
 import time 
 
-from Movement import Movement
 # draw snake game in console
 
 class DrawInConsole:
@@ -8,22 +7,33 @@ class DrawInConsole:
     def __init__(self, game, secs):
         self.game = game
         self.secs = secs
+        self.reseting = False
 
-    def draw(self, move, playing, game):
-        self.drawGrid(playing[0])
+    def reset(self):
+        self.reseting = True
 
-        while move[0] == Movement.NONE:
-            time.sleep(self.secs)
+    def draw(self):
+        while self.game.playing:
+            self.reseting = False
+            self.drawGrid()
 
-        while playing[0]:
-            time.sleep(self.secs)
-            self.drawGrid(playing[0])
+            while self.game.playing and not self.game.isMoving() and not self.reseting:
+                time.sleep(self.secs)
 
-        print("score : " + str(game.score))
-        print("snake len : " + str(game.lenOfSnake()))
+            while self.game.playing and self.game.isMoving() and not self.reseting:
+                time.sleep(self.secs)
+                self.drawGrid()
+
+            if not self.reseting:
+                print("score : " + str(self.game.score))
+                print("snake len : " + str(self.game.lenOfSnake()))
+
+            while self.game.playing and not self.reseting:
+                time.sleep(self.secs)
+        print("stop draw")
 
     # draw game's current state
-    def drawGrid(self, playing):
+    def drawGrid(self):
         verticalBorder = "#"
         horizontalBorder = "#"
 
@@ -44,7 +54,7 @@ class DrawInConsole:
             else:
                 print(verticalBorder, end = " ")
             for column in range(self.game.width):
-                print(self.drawGameInConsolePos(column, line, playing), end = " ")            
+                print(self.drawGameInConsolePos(column, line), end = " ")            
                 
             #if head[0] == self._width and head[1] == line:
             if self.game.posState(self.game.width, line) == self.game.PositionState.SNAKE_HEAD:
@@ -62,11 +72,11 @@ class DrawInConsole:
         print("")
 
     # draw position of grid according to it state
-    def drawGameInConsolePos(self, x, y, playing):
+    def drawGameInConsolePos(self, x, y):
         if self.game.posState(x, y) == self.game.PositionState.EMPTY:
             return "."
         if self.game.posState(x, y) == self.game.PositionState.SNAKE or self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
-            if not playing and self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
+            if self.game.dead and self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
                 return "X"
             return "x"
         if self.game.posState(x, y) == self.game.PositionState.FOOD:

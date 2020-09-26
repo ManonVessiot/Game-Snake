@@ -1,6 +1,7 @@
 import random
+import time
 
-from Movement import Movement
+from Move import Move
 from Snake import Snake
 from Food import Food
 
@@ -16,19 +17,60 @@ class SnakeGame:
         FOOD = 3,
 
     # constructor
-    def __init__(self, width, height):
+    def __init__(self, width, height, secs):
         self.width = width
         self.height = height
-        self._grid = self.buildGrid()
+        self.secs = secs
+
+        self.playing = True
+        self.dead = False
+        self.reseting = False
+
+        self.grid = self.buildGrid()
         
-        self._move = Movement.NONE
-        self._snake = Snake(width, height)
-        self._food = Food(width, height, self._snake)
+        self.move = Move()
+
+        self.snake = Snake(width, height)
+        self.food = Food(width, height, self.snake)
         self.score = 0
+
+    def play(self):
+        while self.playing:
+            self.reseting = False
+
+            while self.playing and not self.isMoving():
+                time.sleep(self.secs)
+
+            while self.playing and self.isMoving():
+                time.sleep(self.secs)
+                self.moveSnake()
+            self.dead = True
+
+            while self.playing and not self.reseting:
+                time.sleep(self.secs)
+            self.dead = False        
+        print("stop playing")
+
+
+    def stop(self):
+        self.playing = False
+
+    def reset(self):
+        self.grid = self.buildGrid()
+        
+        self.move = Move()
+        self.snake = Snake(self.width, self.height)
+        self.food = Food(self.width, self.height, self.snake)
+        self.score = 0
+
+        self.reseting = True
+
+    def isMoving(self):
+        return self.move.isMoving()
 
     # return len of snake body
     def lenOfSnake(self):
-        return self._snake.lenOfBody()
+        return self.snake.lenOfBody()
 
     # build grid for game
     def buildGrid(self):
@@ -39,53 +81,33 @@ class SnakeGame:
 
     # return state of posiion in grid
     def posState(self, x, y):
-        if self._snake.isSnake(x, y):
-            head = self._snake.head()
+        if self.snake.isSnake(x, y):
+            head = self.snake.head()
             if head[0] == x and head[1] == y:
                 return self.PositionState.SNAKE_HEAD
             return self.PositionState.SNAKE
-        elif self._food.isFood(x, y):
+        elif self.food.isFood(x, y):
             return self.PositionState.FOOD
         else:
             return self.PositionState.EMPTY
 
+    def changeMoveOfSnake(self, newMove):
+        turnBack = self.snake.lenOfBody() == 1
+        self.move.changeMove(newMove, turnBack)
+
+
     # move snake
-    def moveSnake(self, newMove):
-        movement = (0, 0)
-        if newMove == Movement.DOWN and (self._snake.lenOfBody() == 1 or self._move != Movement.UP):
-            movement = (0, 1)
-            self._move = newMove
-        elif newMove == Movement.LEFT and (self._snake.lenOfBody() == 1 or self._move != Movement.RIGHT):
-            movement = (-1, 0)
-            self._move = newMove
-        elif newMove == Movement.UP and (self._snake.lenOfBody() == 1 or self._move != Movement.DOWN):
-            movement = (0, -1)
-            self._move = newMove
-        elif newMove == Movement.RIGHT and (self._snake.lenOfBody() == 1 or self._move != Movement.LEFT):
-            movement = (1, 0)
-            self._move = newMove
-        else:
-            movement = self.getMove(self._move)
+    def moveSnake(self):        
+        movement = self.move.getMove()
         
-        if self._snake.move(movement):
-            head = self._snake.head()
-            scoreFood = self._food.eatFood(head[0], head[1])
+        if self.snake.move(movement):
+            head = self.snake.head()
+            scoreFood = self.food.eatFood(head[0], head[1])
             if scoreFood > 0:
                 self.score += 1
-                self._snake.addPArt(movement, scoreFood)
+                self.snake.addPArt(movement, scoreFood)
 
             return True
+        
+        self.move.stop()
         return False
-
-    # return movement to do in the grid
-    def getMove(self, move):
-        if move == Movement.DOWN:
-            return (0, 1)
-        elif move == Movement.LEFT:
-            return(-1, 0)
-        elif move == Movement.UP:
-            return (0, -1)
-        elif move == Movement.RIGHT:
-            return (1, 0)
-        else:
-            return (0, 0)

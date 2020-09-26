@@ -1,7 +1,5 @@
 import random
 
-from Movement import Movement
-
 # manage snake move and evolution
 
 class Snake:

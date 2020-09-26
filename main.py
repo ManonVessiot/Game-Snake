@@ -5,68 +5,35 @@ import os
 from pynput import keyboard
 import threading
 
-from Movement import Movement
+from Move import Move
 from SnakeGame import SnakeGame
 from DrawInConsole import DrawInConsole
 from DrawWithTkinter import DrawWithTkinter
 
-def play():
-    global width
-    global height
-    global secs
-    global moveRef
-    global playingRef
-    global game
-
-
-    while moveRef[0] == Movement.NONE:
-        #print("waiting for moveRef[0]")
-        time.sleep(secs)
-
-    #print("start playing")
-    playingRef[0] = True
-    while playingRef[0]:
-        time.sleep(secs)
-        playingRef[0] = playingTurn(game)
-  #  print("stop playingRef[0]")
-
-# playing a turn in snake (make a move)
-def playingTurn(game):
-    global moveRef
-
-   # print("playing")
-    
-    playing = game.moveSnake(moveRef[0])
-    return playing
-
-# draw game
-def draw(drawer):
-    global moveRef
-    global playingRef
-    global secs
-
-    drawer.draw(moveRef, playingRef, game)
-
-
 # change move on key press
-def moveEvents():
-    global moveRef
-    global playingRef
-
-    while playingRef[0]:
+def moveEvents(game, drawer):
+    while game.playing:
         # The event listener will be running in this block
         with keyboard.Events() as events:
             # Block at most one second
             event = events.get()
             if event is not None and isinstance(event, keyboard.Events.Press):
                 if event.key == keyboard.Key.left:
-                    moveRef[0] = Movement.LEFT
+                    game.changeMoveOfSnake(Move.Movement.LEFT)
                 elif event.key == keyboard.Key.up:
-                    moveRef[0] = Movement.UP
+                    game.changeMoveOfSnake(Move.Movement.UP)
                 elif event.key == keyboard.Key.right:
-                    moveRef[0] = Movement.RIGHT
+                    game.changeMoveOfSnake(Move.Movement.RIGHT)
                 elif event.key == keyboard.Key.down:
-                    moveRef[0] = Movement.DOWN
+                    game.changeMoveOfSnake(Move.Movement.DOWN)
+                elif event.key == keyboard.Key.backspace:
+                    print("reset")
+                    game.reset()
+                    drawer.reset()
+                elif event.key == keyboard.Key.esc:
+                    print("stop")
+                    game.stop()
+    print("stop moveEvents")
 
 # stop program
 def stopProgram():
@@ -75,36 +42,68 @@ def stopProgram():
     except SystemExit:
         os._exit(0)
 
-# globals variables
-posSize = 25
-width = 40
-height = 20
-secs = 0.15
-move = Movement.NONE
-moveRef = [move]
-playing = True
-playingRef = [playing]
-game = SnakeGame(width, height)
-drawMode = 2
+
+
+def format():
+    print("\nWrong use !")
+    print("python3 main.py width height secs drawMode (posSize)")
+    print("   - width, height : size of game in number of cells")
+    print("   - secs : seconds between frame")
+    print("   - drawMode :")
+    print("      - 0 : interface in console")
+    print("      - 1 : interface with tkinter")
+    print("   - posSize : size of a cell (drawMode = 1) ")
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     try:
-        # change move in thread
-        moveThread = threading.Thread(target=moveEvents, args=())
-        moveThread.start()
+        # game variables
+        print("sys.argv[:] : " + str(sys.argv[:]))
+        if len(sys.argv) >= 5:
+            width = int(sys.argv[1])
+            height = int(sys.argv[2])
+            secs = float(sys.argv[3])
 
-        # play in thread
-        playThread = threading.Thread(target=play, args=())
-        playThread.start()
+            drawMode = int(sys.argv[4])
 
-        if drawMode == 1:
-            # draw console
-            drawerConsole = DrawInConsole(game, secs)
-            draw(drawerConsole)
+            game = SnakeGame(width, height, secs)
+
+            if drawMode == 0:
+                # draw console
+                drawerConsole = DrawInConsole(game, secs)
+                drawer = drawerConsole
+            elif drawMode == 1:
+                # draw tkinter
+                if len(sys.argv) >= 6:
+                    posSize = int(sys.argv[5])
+                else:
+                    posSize = 50
+                
+                drawerTk = DrawWithTkinter(game, posSize, secs)
+                drawer = drawerTk
+            else:
+                format()
+                stopProgram()
+
+            # change move in thread
+            moveThread = threading.Thread(target=moveEvents, args=(game,drawer,))
+            moveThread.start()
+
+            # play in thread
+            playThread = threading.Thread(target=game.play, args=())
+            playThread.start()
+
+            drawer.draw()
         else:
-            # draw console
-            drawerTk = DrawWithTkinter(game, posSize, secs)
-            draw(drawerTk)
+            format()
+            stopProgram()
 
     except KeyboardInterrupt:
         print('\nInterrupted')

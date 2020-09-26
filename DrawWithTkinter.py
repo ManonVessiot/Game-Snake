@@ -1,9 +1,5 @@
-from tkinter import * 
-import time 
-import threading
+from tkinter import Tk, Canvas
 
-from Movement import Movement
-from SnakeGame import SnakeGame
 # draw snake game in console
 
 class DrawWithTkinter:
@@ -12,6 +8,7 @@ class DrawWithTkinter:
         self.game = game
         self.posSize = posSize
         self.secs = int(secs * 500)
+        self.reseting = False
 
         self.fen = Tk()
         self.fen.title('Snake game')
@@ -21,34 +18,56 @@ class DrawWithTkinter:
 
         self.canvas = Canvas(self.fen, width=self.width, height=self.heiht)
 
+    def reset(self):
+        self.reseting = True
+
     def run(self):
         self.fen.mainloop()        
 
-    def update(self, move, playing, game):
-        if move[0] == Movement.NONE:
-            self.fen.after(self.secs, self.update, move, playing, game)
+    def update1(self):
+        if self.game.playing:
+            self.reseting = False
+            self.drawGrid()
+
+            self.fen.after(self.secs, self.update2)
         else:
-            self.canvas.delete("all")
+            print("stop draw")
+            self.fen.destroy()
 
-            self.drawGame(playing[0])
-            self.canvas.pack(fill=X)
-            if playing[0]:
-                self.fen.after(self.secs, self.update, move, playing, game)
-            else:        
-                print("score : " + str(game.score))
-                print("snake len : " + str(game.lenOfSnake()))
-
+    def update2(self):
+        if self.game.playing and not self.game.isMoving() and not self.reseting:
+            self.fen.after(self.secs, self.update2)     
+        else:
+            self.fen.after(self.secs, self.update3)
 
 
-    def draw(self, move, playing, game):
-        self.fen.after(self.secs, self.update, move, playing, game)
-        self.drawGrid(playing[0])
+    def update3(self):
+        self.drawGrid()
+        if self.game.playing and self.game.isMoving() and not self.reseting:
+            self.fen.after(self.secs, self.update3)
+        else:
+            if not self.reseting:
+                print("score : " + str(self.game.score))
+                print("snake len : " + str(self.game.lenOfSnake()))
+            self.fen.after(self.secs, self.update4)
 
 
-    def drawGrid(self, playing):
-        self.drawGame(playing)
-        self.canvas.pack()
+    def update4(self):
+        if self.game.playing and not self.reseting:
+            self.fen.after(self.secs, self.update4)
+        else:
+            self.fen.after(self.secs, self.update1)
+
+
+    def draw(self):
+        self.fen.after(self.secs, self.update1)
+        self.drawGrid()
         self.run()
+
+
+    def drawGrid(self):
+        self.drawGame()
+        self.canvas.pack()
 
     def drawSquare(self, x, y, colorFill, colorOutline):
         xCorner = x * self.posSize
@@ -70,7 +89,9 @@ class DrawWithTkinter:
     def drawEmpty(self, x, y):
         self.drawSquare(x, y, "white", "black")
 
-    def drawGame(self, playing):
+    def drawGame(self):
+        self.canvas.delete("all")
+
         self.drawBorder(0, 0)
         for column in range(1, self.game.width + 2):
             if self.game.posState(column - 1, -1) == self.game.PositionState.SNAKE_HEAD:
@@ -85,7 +106,7 @@ class DrawWithTkinter:
                 self.drawBorder(0, line + 1)
             
             for column in range(self.game.width):
-                self.drawGamePos(column, line, playing)       
+                self.drawGamePos(column, line)       
             
             if self.game.posState(self.game.width, line) == self.game.PositionState.SNAKE_HEAD:
                 self.drawSnakeHeadDead(self.game.width + 1, line + 1)
@@ -101,11 +122,11 @@ class DrawWithTkinter:
                 self.drawBorder(column, self.game.height + 1)
     
     # draw position of grid according to it state
-    def drawGamePos(self, x, y, playing):
+    def drawGamePos(self, x, y):
         if self.game.posState(x, y) == self.game.PositionState.EMPTY:
             self.drawEmpty(x + 1, y + 1)
         if self.game.posState(x, y) == self.game.PositionState.SNAKE or self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
-            if not playing and self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
+            if self.game.dead and self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
                 self.drawSnakeHeadDead(x + 1, y + 1)
             else:
                 self.drawSnake(x + 1, y + 1)
