@@ -9,6 +9,7 @@ from Move import Move
 from SnakeGame import SnakeGame
 from DrawInConsole import DrawInConsole
 from DrawWithTkinter import DrawWithTkinter
+from DrawWithTkinter_Texture import DrawWithTkinter_Texture
 
 # change move on key press
 def moveEvents(game, drawer):
@@ -77,8 +78,7 @@ if __name__ == '__main__':
 
             if drawMode == 0:
                 # draw console
-                drawerConsole = DrawInConsole(game, secs)
-                drawer = drawerConsole
+                drawer = DrawInConsole(game, secs)
             elif drawMode == 1:
                 # draw tkinter
                 if len(sys.argv) >= 6:
@@ -86,8 +86,15 @@ if __name__ == '__main__':
                 else:
                     posSize = 50
                 
-                drawerTk = DrawWithTkinter(game, posSize, secs)
-                drawer = drawerTk
+                drawer = DrawWithTkinter(game, posSize, secs)
+            elif drawMode == 2:
+                # draw tkinter with texture
+                if len(sys.argv) >= 6:
+                    posSize = int(sys.argv[5])
+                else:
+                    posSize = 50
+                
+                drawer = DrawWithTkinter_Texture(game, posSize, secs)
             else:
                 format()
                 stopProgram()
