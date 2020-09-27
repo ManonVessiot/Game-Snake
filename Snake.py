@@ -18,6 +18,30 @@ class Snake:
     def isSnake(self, x, y):
         return (x, y) in self._body
 
+    def getDiffsWithNeighbours(self, x, y):
+        if (x, y) not in self._body or len(self._body) < 2:
+            print(x, y)
+            return None
+
+        index = self._body.index((x, y))
+        diff = []
+        if index == 0:
+            diff.append(None)
+            diff1 = (self._body[index+1][0] - self._body[index][0], self._body[index+1][1] - self._body[index][1])
+            diff.append(diff1)
+        elif index == len(self._body) - 1:
+            diff0 = (self._body[index-1][0] - self._body[index][0], self._body[index-1][1] - self._body[index][1])
+            diff.append(diff0)
+            diff.append(None)
+        else:
+            diff0 = (self._body[index-1][0] - self._body[index][0], self._body[index-1][1] - self._body[index][1])
+            diff.append(diff0)
+            diff1 = (self._body[index+1][0] - self._body[index][0], self._body[index+1][1] - self._body[index][1])
+            diff.append(diff1)
+        return diff
+
+
+
     # return len of snake body
     def lenOfBody(self):
         return len(self._body)

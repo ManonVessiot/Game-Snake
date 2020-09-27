@@ -31,6 +31,9 @@ class SnakeGame:
         self.move = Move()
 
         self.snake = Snake(width, height)
+
+        part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        self.snake.addPArt(part2Move[random.randrange(0, 4)], 1)
         self.food = Food(width, height, self.snake)
         self.score = 0
 

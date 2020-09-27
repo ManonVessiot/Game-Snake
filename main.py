@@ -108,6 +108,7 @@ if __name__ == '__main__':
             playThread.start()
 
             drawer.draw()
+            stopProgram()
         else:
             format()
             stopProgram()

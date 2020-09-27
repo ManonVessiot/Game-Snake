@@ -1,4 +1,8 @@
-import tkinter as tk
+from tkinter import Tk, Canvas
+from PIL import ImageTk
+from PIL import Image
+import random
+from Move import Move
 
 # draw snake game in console
 
@@ -7,19 +11,24 @@ class DrawWithTkinter_Texture:
     def __init__(self, game, posSize, secs):
         self.game = game
         self.posSize = posSize
-        self.secs = int(secs * 500)
+        self.secs = int(secs * 250)
         self.reseting = False
-        self.path = "/home/manon/Documents/Projects/MyProjects/SnakeGame_py/"
-        self.snake = "snake-graphics.png"
+        self.path = "/home/manon/Documents/Projects/MyProjects/SnakeGame_py/img/"
+
         self.grass = "grass.png"
+        self.food = "food.png"
+        self.snake = ["SnakePart/head.png", "SnakePart/body.png", "SnakePart/bodyTurnbis.png", "SnakePart/queue.png"]
+        self.grassTexture = None
+        self.foodTexture = None
+        self.snakeTexture = []
 
-        self.fen = tk.Tk()
+        self.fen = Tk()
         self.fen.title('Snake game')
-        self.height = (game.height + 2) * posSize
+        self.heiht = (game.height + 2) * posSize
         self.width = (game.width + 2) * posSize
-        self.fen.geometry(str(self.width) + "x" + str(self.height))
+        self.fen.geometry(str(self.width) + "x" + str(self.heiht))
 
-        self.canvas = tk.Canvas(self.fen, width=self.width, height=self.height)
+        self.canvas = Canvas(self.fen, width=self.width, height=self.heiht)
 
     def reset(self):
         self.reseting = True
@@ -63,17 +72,20 @@ class DrawWithTkinter_Texture:
 
 
     def draw(self):
-        #self.drawGrid()
-        
-        #snakeTexture=tk.PhotoImage(master=self.canvas, file=self.path + self.snake)
-        grassTexture=tk.PhotoImage(master=self.canvas, file=self.path + self.grass)
-        grassTexture = grassTexture.subsample(2)
-        self.canvas.create_image(0, 0, image = grassTexture, anchor = "nw")
-        #your other label or button or ...
-        #self.fen.wm_attributes("-alpha", 0.5)
 
-        self.canvas.pack()
-        self.fen.mainloop()
+        self.grassTexture = ImageTk.PhotoImage(Image.open(self.path + self.grass).resize((self.posSize, self.posSize)))
+        self.foodTexture = ImageTk.PhotoImage(Image.open(self.path + self.food).resize((self.posSize, self.posSize)))
+
+        for i in range(len(self.snake)):
+            self.snakeTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.snake[i]).resize((self.posSize, self.posSize))))
+            if i != 1:
+                for j in range(1, 4):
+                    self.snakeTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.snake[i]).resize((self.posSize, self.posSize)).rotate(angle=j * 90)))
+            else:
+                self.snakeTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.snake[i]).resize((self.posSize, self.posSize)).rotate(angle=90)))
+        self.fen.after(self.secs, self.update1)
+        self.drawGrid()
+        self.run()
 
 
     def drawGrid(self):
@@ -86,24 +98,31 @@ class DrawWithTkinter_Texture:
         self.canvas.create_rectangle(xCorner, yCorner, xCorner + self.posSize, yCorner + self.posSize, fill=colorFill, outline = colorOutline)
 
     def drawBorder(self, x, y):
-        # TODO
         self.drawSquare(x, y, "black", "white")
 
     def drawSnake(self, x, y):
-        # TODO
-        self.drawSquare(x, y, "grey", "black")
+        self.drawEmpty(x, y)
+        xCorner = x * self.posSize
+        yCorner = y * self.posSize
+        state = self.stateOfSnake(x-1, y-1)
+        self.canvas.create_image(xCorner, yCorner, image = self.snakeTexture[state], anchor = "nw")
 
     def drawSnakeHeadDead(self, x, y):
-        # TODO
-        self.drawSquare(x, y, "red", "white")
+        self.drawSquare(x, y, "red", "red")
+        xCorner = x * self.posSize
+        yCorner = y * self.posSize
+        self.canvas.create_image(xCorner, yCorner, image = self.snakeTexture[self.stateOfSnake(x-1, y-1)], anchor = "nw")
 
     def drawFood(self, x, y):
-        # TODO
-        self.drawSquare(x, y, "green", "black")
+        xCorner = x * self.posSize
+        yCorner = y * self.posSize
+        self.canvas.create_image(xCorner, yCorner, image = self.grassTexture, anchor = "nw")
+        self.canvas.create_image(xCorner, yCorner, image = self.foodTexture, anchor = "nw")
 
     def drawEmpty(self, x, y):
-        # TODO
-        self.drawSquare(x, y, "green", "green")
+        xCorner = x * self.posSize
+        yCorner = y * self.posSize
+        self.canvas.create_image(xCorner, yCorner, image = self.grassTexture, anchor = "nw")
 
     def drawGame(self):
         self.canvas.delete("all")
@@ -148,3 +167,55 @@ class DrawWithTkinter_Texture:
                 self.drawSnake(x + 1, y + 1)
         if self.game.posState(x, y) == self.game.PositionState.FOOD:
             self.drawFood(x + 1, y + 1)
+
+    def stateOfSnake(self, x, y):
+        diffs = self.game.snake.getDiffsWithNeighbours(x, y)
+        if diffs != None:
+            if diffs[0] == None:
+                #head rotation depend on diff of the neighbour ; state in (0, 1, 2, 3)
+                if diffs[1] == (0, -1):
+                    return 0
+                elif diffs[1] == (-1, 0):
+                    return 1
+                elif diffs[1] == (0, 1):
+                    return 2
+                elif diffs[1] == (1, 0):
+                    return 3
+            elif diffs[1] == None:
+                #queue rotation depend on diff of the neighbour ; state in (10, 11, 12, 13)
+                if diffs[0] == (0, 1):
+                    return 10
+                elif diffs[0] == (1, 0):
+                    return 11
+                elif diffs[0] == (0, -1):
+                    return 12
+                elif diffs[0] == (-1, 0):
+                    return 13
+            else:
+                #body rotation depend on diff of the 2 neighbour ; state in (4, 5, 6, 7, 8, 9)
+                if diffs[0][0] == -diffs[1][0] and diffs[0][1] == -diffs[1][1]:
+                    if diffs[1][0] != 0:
+                        return 4
+                    return 5
+                if diffs[0][1] == 1 or diffs[1][1] == 1:
+                    if diffs[0][0] == -1 or diffs[1][0] == -1:
+                        return 8
+                    if diffs[0][0] == 1 or diffs[1][0] == 1:
+                        return 9
+                if diffs[0][1] == -1 or diffs[1][1] == -1:
+                    if diffs[0][0] == -1 or diffs[1][0] == -1:
+                        return 7
+                    if diffs[0][0] == 1 or diffs[1][0] == 1:
+                        return 6
+        else:
+            if self.game.move.move == Move.Movement.DOWN:
+                return 0
+            elif self.game.move.move == Move.Movement.RIGHT:
+                return 1
+            elif self.game.move.move == Move.Movement.UP:
+                return 2
+            elif self.game.move.move == Move.Movement.LEFT:
+                return 3
+            else:
+                return 0
+
