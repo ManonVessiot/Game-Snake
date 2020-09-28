@@ -12,7 +12,7 @@ class Food:
         self._foodNumberSinceStart = 0
 
         self.positions = []
-        self._scores = []
+        self.scores = []
         self._createFood()
 
     # create food
@@ -26,7 +26,7 @@ class Food:
 
         self._foodNumberSinceStart += 1
         self.positions.append((x, y))
-        self._scores.append(self._createScore())
+        self.scores.append(self._createScore())
 
     # create score or food
     def _createScore(self):
@@ -41,9 +41,9 @@ class Food:
         score = 0
         if self.isFood(x, y):
             i = self.positions.index((x, y))
-            score = self._scores[i]
+            score = self.scores[i]
             self.positions.remove((x, y))
-            self._scores = self._scores[:i] + self._scores[i+1:]
+            self.scores = self.scores[:i] + self.scores[i+1:]
             self._createFood()
         return score
 

@@ -18,8 +18,8 @@ class DrawWithTkinter_Texture:
         self.grass = "grass.png"
         self.grassTexture = None
 
-        self.food = "food.png"
-        self.foodTexture = None
+        self.food = ["Foods/food2.png"]
+        self.foodTexture = []
 
         self.rock = ["Rocks/rock1.png", "Rocks/rock2.png", "Rocks/rock3.png", "Rocks/rock4.png"]
         self.rockTexture = []
@@ -84,7 +84,9 @@ class DrawWithTkinter_Texture:
     def draw(self):
 
         self.grassTexture = ImageTk.PhotoImage(Image.open(self.path + self.grass).resize((self.posSize, self.posSize)))
-        self.foodTexture = ImageTk.PhotoImage(Image.open(self.path + self.food).resize((self.posSize, self.posSize)))
+
+        for i in range(len(self.food)):
+            self.foodTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.food[i]).resize((self.posSize, self.posSize))))
 
         for i in range(len(self.rock)):
             self.rockTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.rock[i]).resize((self.posSize, self.posSize))))
@@ -156,7 +158,8 @@ class DrawWithTkinter_Texture:
     def drawFood(self, x, y):
         xCorner = x * self.posSize
         yCorner = y * self.posSize
-        self.canvas.create_image(xCorner, yCorner, image = self.foodTexture, anchor = "nw")
+        index = self.game.food.scores[self.game.food.positions.index((x-1, y-1))] % len(self.foodTexture)
+        self.canvas.create_image(xCorner, yCorner, image = self.foodTexture[index], anchor = "nw")
 
     def drawEmpty(self, x, y):
         xCorner = x * self.posSize
