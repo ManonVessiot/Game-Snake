@@ -11,7 +11,7 @@ class Food:
 
         self._foodNumberSinceStart = 0
 
-        self._positions = []
+        self.positions = []
         self._scores = []
         self._createFood()
 
@@ -21,11 +21,11 @@ class Food:
         while isSnake:
             x = random.randrange(0, self._width)
             y = random.randrange(0, self._height)
-            if not self._snake.isSnake(x, y) and (x, y) not in self._positions:
+            if not self._snake.isSnake(x, y) and (x, y) not in self.positions:
                 isSnake = False
 
         self._foodNumberSinceStart += 1
-        self._positions.append((x, y))
+        self.positions.append((x, y))
         self._scores.append(self._createScore())
 
     # create score or food
@@ -38,13 +38,13 @@ class Food:
     def eatFood(self, x, y):
         score = 0
         if self.isFood(x, y):
-            i = self._positions.index((x, y))
+            i = self.positions.index((x, y))
             score = self._scores[i]
-            self._positions.remove((x, y))
+            self.positions.remove((x, y))
             self._scores = self._scores[:i] + self._scores[i+1:]
             self._createFood()
         return score
 
     # check if pos si food
     def isFood(self, x, y):
-        return (x, y) in self._positions
+        return (x, y) in self.positions
