@@ -38,46 +38,47 @@ class DrawInConsole:
         horizontalBorder = "#"
 
         print("")
-        print(horizontalBorder, end = "")
-        for line in range(1, self.game.width + 2):
-            #if head[1] == -1 and head[0] == line - 1:
-            if self.game.posState(line - 1, -1) == self.game.PositionState.SNAKE_HEAD:
-                print(horizontalBorder + "X", end = "")
-            else:
-                print(horizontalBorder + horizontalBorder, end = "")
-        print("")
+        if self.game.border:
+            print(horizontalBorder, end = "")
+            for line in range(1, self.game.width + 2):
+                if (line-1, -1) == self.game.snake.head():
+                    print(horizontalBorder + "O", end = "")
+                else:
+                    print(horizontalBorder + horizontalBorder, end = "")
+            print("")
 
         for line in range(self.game.height):
-            #if head[0] == -1 and head[1] == line:
-            if self.game.posState(-1, line) == self.game.PositionState.SNAKE_HEAD:
-                print("X", end = " ")
-            else:
-                print(verticalBorder, end = " ")
+            if self.game.border:
+                if (-1, line) == self.game.snake.head():
+                    print("O", end = " ")
+                else:
+                    print(verticalBorder, end = " ")
             for column in range(self.game.width):
                 print(self.drawGameInConsolePos(column, line), end = " ")            
-                
-            #if head[0] == self._width and head[1] == line:
-            if self.game.posState(self.game.width, line) == self.game.PositionState.SNAKE_HEAD:
-                print("X")
-            else:
-                print(verticalBorder)
             
-        print(horizontalBorder, end = "")
-        for line in range(1, self.game.width + 2):
-            #if head[1] == self._height and head[0] == line - 1:
-            if self.game.posState(line - 1, self.game.height) == self.game.PositionState.SNAKE_HEAD:
-                print(horizontalBorder + "X", end = "")
-            else:
-                print(horizontalBorder + horizontalBorder, end = "")
+            if self.game.border:
+                if (self.game.width, line) == self.game.snake.head():
+                    print("O", end = " ")
+                else:
+                    print(verticalBorder, end = " ")
+            print("")
+            
+        if self.game.border:
+            print(horizontalBorder, end = "")
+            for line in range(1, self.game.width + 2):
+                #if head[1] == self._height and head[0] == line - 1:
+                if (line - 1, self.game.height) == self.game.snake.head():
+                    print(horizontalBorder + "O", end = "")
+                else:
+                    print(horizontalBorder + horizontalBorder, end = "")
         print("")
 
     # draw position of grid according to it state
     def drawGameInConsolePos(self, x, y):
-        if self.game.posState(x, y) == self.game.PositionState.EMPTY:
-            return "."
-        if self.game.posState(x, y) == self.game.PositionState.SNAKE or self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
-            if self.game.dead and self.game.posState(x, y) == self.game.PositionState.SNAKE_HEAD:
-                return "X"
+        if self.game.food.isFood(x, y):
             return "x"
-        if self.game.posState(x, y) == self.game.PositionState.FOOD:
+        if self.game.snake.isSnake(x, y, False):
+            if (x, y) == self.game.snake.head():
+                return "O"
             return "o"
+        return "."

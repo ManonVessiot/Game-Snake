@@ -16,16 +16,26 @@ class DrawWithTkinter_Texture:
         self.path = "/home/manon/Documents/Projects/MyProjects/SnakeGame_py/img/"
 
         self.grass = "grass.png"
-        self.food = "food.png"
-        self.snake = ["SnakePart/head.png", "SnakePart/body.png", "SnakePart/bodyTurnbis.png", "SnakePart/queue.png"]
         self.grassTexture = None
+
+        self.food = "food.png"
         self.foodTexture = None
+
+        self.rock = ["Rocks/rock1.png", "Rocks/rock2.png", "Rocks/rock3.png", "Rocks/rock4.png"]
+        self.rockTexture = []
+        self.rocksIndex = []
+
+        self.snake = ["SnakePart/head.png", "SnakePart/body.png", "SnakePart/bodyTurn.png", "SnakePart/queue.png"]        
         self.snakeTexture = []
 
         self.fen = Tk()
         self.fen.title('Snake game')
-        self.heiht = (game.height + 2) * posSize
-        self.width = (game.width + 2) * posSize
+        self.heiht = game.height * posSize
+        self.width = game.width * posSize
+        if self.game.border:
+            self.heiht += 2 * posSize
+            self.width += 2 * posSize
+
         self.fen.geometry(str(self.width) + "x" + str(self.heiht))
 
         self.canvas = Canvas(self.fen, width=self.width, height=self.heiht)
@@ -76,6 +86,19 @@ class DrawWithTkinter_Texture:
         self.grassTexture = ImageTk.PhotoImage(Image.open(self.path + self.grass).resize((self.posSize, self.posSize)))
         self.foodTexture = ImageTk.PhotoImage(Image.open(self.path + self.food).resize((self.posSize, self.posSize)))
 
+        for i in range(len(self.rock)):
+            self.rockTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.rock[i]).resize((self.posSize, self.posSize))))
+        
+        #Border
+        if self.game.border:
+            for line in range(self.game.height + 2):
+                if line == 0 or line == self.game.height + 1:
+                    for column in range(self.game.width + 2):
+                        self.rocksIndex.append(random.randrange(0, len(self.rockTexture)))
+                else:
+                    self.rocksIndex.append(random.randrange(0, len(self.rockTexture)))
+                    self.rocksIndex.append(random.randrange(0, len(self.rockTexture)))
+
         for i in range(len(self.snake)):
             self.snakeTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.snake[i]).resize((self.posSize, self.posSize))))
             if i != 1:
@@ -83,7 +106,6 @@ class DrawWithTkinter_Texture:
                     self.snakeTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.snake[i]).resize((self.posSize, self.posSize)).rotate(angle=j * 90)))
             else:
                 self.snakeTexture.append(ImageTk.PhotoImage(Image.open(self.path + self.snake[i]).resize((self.posSize, self.posSize)).rotate(angle=90)))
-        
         
         self.fen.after(self.secs, self.update1)
         self.drawGrid()
@@ -100,7 +122,26 @@ class DrawWithTkinter_Texture:
         self.canvas.create_rectangle(xCorner, yCorner, xCorner + self.posSize, yCorner + self.posSize, fill=colorFill, outline = colorOutline)
 
     def drawBorder(self, x, y):
-        self.drawSquare(x, y, "black", "white")
+        xCorner = x * self.posSize
+        yCorner = y * self.posSize
+        index = 0
+        if x == 0:
+            index = y
+        elif x == self.game.height + 1:
+            index = self.game.height + 2 + 2 * self.game.width + y
+        else:
+            index = self.game.height + 2 + 2 * (x - 1)
+            if y == 0:
+                index += 1
+            else: 
+                index +=2
+
+        if index >= len(self.rocksIndex):
+            print("x, y = " + str(x) + ", " + str(y))
+            print("len(self.rocksIndex) = " + str(len(self.rocksIndex)))
+            print("index = " + str(index))
+            index = 0
+        self.canvas.create_image(xCorner, yCorner, image = self.rockTexture[self.rocksIndex[index]], anchor = "nw")
 
     def drawSnake(self, x, y, state):
         xCorner = x * self.posSize
@@ -126,22 +167,29 @@ class DrawWithTkinter_Texture:
         self.canvas.delete("all")
 
         #Grid
-        for line in range(self.game.height + 2):
-            for column in range(self.game.width + 2):
+        borderPart = 0
+        if self.game.border:
+            borderPart = 2
+        for line in range(self.game.height + borderPart):
+            for column in range(self.game.width + borderPart):
                 self.drawEmpty(column, line)
 
         #Border
-        for line in range(self.game.height + 2):
-            if line == 0 or line == self.game.height + 1:
-                for column in range(self.game.width + 2):
-                    self.drawBorder(column, line)
-            else:
-                self.drawBorder(0, line)
-                self.drawBorder(self.game.width + 1, line)
+        if self.game.border:
+            for line in range(self.game.height + 2):
+                if line == 0 or line == self.game.height + 1:
+                    for column in range(self.game.width + 2):
+                        self.drawBorder(column, line)
+                else:
+                    self.drawBorder(0, line)
+                    self.drawBorder(self.game.width + 1, line)
         
         #Food
+        borderPart = 0
+        if self.game.border:
+            borderPart = 1
         for food in self.game.food.positions:            
-            self.drawFood(food[0]+1, food[1]+1)
+            self.drawFood(food[0]+borderPart, food[1]+borderPart)
         
         #Snake
         for i in range(len(self.game.snake.body)-1, -1, -1):
@@ -154,7 +202,7 @@ class DrawWithTkinter_Texture:
             else:
                 state = self.stateOfSnake(i, 1)
             
-            self.drawSnake(bodyPart[0]+1, bodyPart[1]+1, state)
+            self.drawSnake(bodyPart[0]+borderPart, bodyPart[1]+borderPart, state)
 
         
     
@@ -173,7 +221,7 @@ class DrawWithTkinter_Texture:
     def stateOfSnake(self, i, part):
         diffs = self.game.snake.getDiffsWithNeighbours(i)
         if diffs != None:
-            if (part == -1 or part == 0) and diffs[0] == None:
+            if (part == -1 or part == 0) and diffs[0] == None and diffs[1] != None:
                 #head rotation depend on diff of the neighbour ; state in (0, 1, 2, 3)
                 if diffs[1] == (0, -1):
                     return 0
@@ -183,7 +231,7 @@ class DrawWithTkinter_Texture:
                     return 2
                 if diffs[1] == (1, 0):
                     return 3
-            if (part == -1 or part == 2) and diffs[1] == None:
+            if (part == -1 or part == 2) and diffs[0] != None and diffs[1] == None:
                 #queue rotation depend on diff of the neighbour ; state in (10, 11, 12, 13)
                 if diffs[0] == (0, 1):
                     return 10
@@ -194,21 +242,22 @@ class DrawWithTkinter_Texture:
                 if diffs[0] == (-1, 0):
                     return 13
             
-            #body rotation depend on diff of the 2 neighbour ; state in (4, 5, 6, 7, 8, 9)
-            if diffs[0][0] == -diffs[1][0] and diffs[0][1] == -diffs[1][1]:
-                if diffs[1][0] != 0:
-                    return 4
-                return 5
-            if diffs[0][1] == 1 or diffs[1][1] == 1:
-                if diffs[0][0] == -1 or diffs[1][0] == -1:
-                    return 8
-                if diffs[0][0] == 1 or diffs[1][0] == 1:
-                    return 9
-            if diffs[0][1] == -1 or diffs[1][1] == -1:
-                if diffs[0][0] == -1 or diffs[1][0] == -1:
-                    return 7
-                if diffs[0][0] == 1 or diffs[1][0] == 1:
-                    return 6
+            if diffs[0] != None and diffs[1] != None:
+                #body rotation depend on diff of the 2 neighbour ; state in (4, 5, 6, 7, 8, 9)
+                if diffs[0][0] == -diffs[1][0] and diffs[0][1] == -diffs[1][1]:
+                    if diffs[1][0] != 0:
+                        return 4
+                    return 5
+                if diffs[0][1] == 1 or diffs[1][1] == 1:
+                    if diffs[0][0] == -1 or diffs[1][0] == -1:
+                        return 8
+                    if diffs[0][0] == 1 or diffs[1][0] == 1:
+                        return 9
+                if diffs[0][1] == -1 or diffs[1][1] == -1:
+                    if diffs[0][0] == -1 or diffs[1][0] == -1:
+                        return 7
+                    if diffs[0][0] == 1 or diffs[1][0] == 1:
+                        return 6
         
         if self.game.move.move == Move.Movement.DOWN:
             return 0

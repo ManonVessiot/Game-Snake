@@ -10,30 +10,21 @@ from enum import Enum
 # manage snake game
 
 class SnakeGame:
-    class PositionState(Enum):
-        EMPTY = 0,
-        SNAKE = 1,
-        SNAKE_HEAD = 2,
-        FOOD = 3,
-
     # constructor
-    def __init__(self, width, height, secs):
+    def __init__(self, width, height, secs, border):
         self.width = width
         self.height = height
         self.secs = secs
 
         self.playing = True
-        self.dead = False
         self.reseting = False
+        self.border = border
 
-        self.grid = self.buildGrid()
+        self.buildGrid()
         
         self.move = Move()
 
-        self.snake = Snake(width, height)
-
-        part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-        self.snake.addPArt(part2Move[random.randrange(0, 4)], 1)
+        self.snake = Snake(width, height, border)
         self.food = Food(width, height, self.snake)
         self.score = 0
 
@@ -47,11 +38,9 @@ class SnakeGame:
             while self.playing and self.isMoving():
                 time.sleep(self.secs)
                 self.moveSnake()
-            self.dead = True
 
             while self.playing and not self.reseting:
-                time.sleep(self.secs)
-            self.dead = False        
+                time.sleep(self.secs)    
         print("stop playing")
 
 
@@ -59,12 +48,10 @@ class SnakeGame:
         self.playing = False
 
     def reset(self):
-        self.grid = self.buildGrid()
+        self.buildGrid()
         
         self.move = Move()
-        self.snake = Snake(self.width, self.height)
-        part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-        self.snake.addPArt(part2Move[random.randrange(0, 4)], 1)
+        self.snake = Snake(self.width, self.height, self.border)
         self.food = Food(self.width, self.height, self.snake)
         self.score = 0
 
@@ -79,22 +66,22 @@ class SnakeGame:
 
     # build grid for game
     def buildGrid(self):
-        grid = [[]] * self.height
-        for line in range(self.height):
-            grid[line] = [0] * self.width
-        return grid
+        addBorder = 0
+        if self.border:
+            addBorder = 2
+        self.grid = [[]] * (self.height + addBorder)
+        for line in range(self.height + addBorder):
+            self.grid[line] = [0] * (self.width + addBorder)
 
-    # return state of posiion in grid
-    def posState(self, x, y):
-        if self.snake.isSnake(x, y):
-            head = self.snake.head()
-            if head[0] == x and head[1] == y:
-                return self.PositionState.SNAKE_HEAD
-            return self.PositionState.SNAKE
-        elif self.food.isFood(x, y):
-            return self.PositionState.FOOD
-        else:
-            return self.PositionState.EMPTY
+        if self.border:
+            self.buildGridBorder()
+
+    # build grid border
+    def buildGridBorder(self):
+        for line in range(self.height + 2):
+            for column in range(self.width + 2):
+                if line == 0 or line == self.height + 1 or column == 0 or column == self.width + 1:
+                    self.grid[line][column] = -1
 
     def changeMoveOfSnake(self, newMove):
         turnBack = self.snake.lenOfBody() == 1
@@ -110,6 +97,7 @@ class SnakeGame:
             scoreFood = self.food.eatFood(head[0], head[1])
             if scoreFood > 0:
                 self.score += 1
+                print("scoreFood : " + str(scoreFood))
                 self.snake.addPArt(movement, scoreFood)
 
             return True

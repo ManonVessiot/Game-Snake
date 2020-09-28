@@ -4,19 +4,32 @@ import random
 
 class Snake:
     # constructor
-    def __init__(self, width, height):
+    def __init__(self, width, height, border):
         self._width = width
         self._height = height
+        self.border = border
+        self.startedMoving = False
 
         self._lastRemoved = None
 
         x = random.randrange(0, width)
         y = random.randrange(0, height)
         self.body = [(x, y)]
+        part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        partAdded = False
+        while not partAdded:
+            i = random.randrange(0, len(part2Move))
+            partAdded = self.addPArt(part2Move[i], 1)
+            if not partAdded:
+                part2Move.remove(part2Move[i])
+
 
     # check if pos is a snake part
-    def isSnake(self, x, y):
-        return (x, y) in self.body
+    def isSnake(self, x, y, border):
+        pos = (x, y)
+        if border:
+            pos = (x+1, y+1)
+        return pos in self.body
 
     def getDiffsWithNeighbours(self, i):
         if (i not in range(len(self.body))) or len(self.body) < 2:
@@ -26,16 +39,40 @@ class Snake:
         diff = []
         if index == 0:
             diff.append(None)
-            diff1 = (self.body[index+1][0] - self.body[index][0], self.body[index+1][1] - self.body[index][1])
+            x = self.body[index+1][0] - self.body[index][0]
+            y = self.body[index+1][1] - self.body[index][1]
+            if abs(x) > 1:
+                x = - x / abs(x)
+            if abs(y) > 1:
+                y = - y / abs(y)
+            diff1 = (x, y)
             diff.append(diff1)
         elif index == len(self.body) - 1:
-            diff0 = (self.body[index-1][0] - self.body[index][0], self.body[index-1][1] - self.body[index][1])
+            x = self.body[index-1][0] - self.body[index][0]
+            y = self.body[index-1][1] - self.body[index][1]
+            if abs(x) > 1:
+                x = - x / abs(x)
+            if abs(y) > 1:
+                y = - y / abs(y)
+            diff0 = (x, y)
             diff.append(diff0)
             diff.append(None)
         else:
-            diff0 = (self.body[index-1][0] - self.body[index][0], self.body[index-1][1] - self.body[index][1])
+            x = self.body[index-1][0] - self.body[index][0]
+            y = self.body[index-1][1] - self.body[index][1]
+            if abs(x) > 1:
+                x = - x / abs(x)
+            if abs(y) > 1:
+                y = - y / abs(y)
+            diff0 = (x, y)
             diff.append(diff0)
-            diff1 = (self.body[index+1][0] - self.body[index][0], self.body[index+1][1] - self.body[index][1])
+            x = self.body[index+1][0] - self.body[index][0]
+            y = self.body[index+1][1] - self.body[index][1]
+            if abs(x) > 1:
+                x = - x / abs(x)
+            if abs(y) > 1:
+                y = - y / abs(y)
+            diff1 = (x, y)
             diff.append(diff1)
         return diff
 
@@ -49,15 +86,31 @@ class Snake:
     def move(self, movement):
         snakeBiteHimself = False
 
-        newHeadPos = (self.body[0][0] + movement[0], self.body[0][1] + movement[1])
-        if newHeadPos in self.body[:-1]:
+        newHeadPos = [self.body[0][0] + movement[0], self.body[0][1] + movement[1]]
+        
+        if (newHeadPos[0], newHeadPos[1]) in self.body[:-1]:
             snakeBiteHimself = True
+
         self._lastRemoved = self.body[-1]
+        self.body = [(newHeadPos[0], newHeadPos[1])] + self.body[:-1]
 
-        self.body = [newHeadPos] + self.body[:len(self.body) - 1]
-
-        if snakeBiteHimself or newHeadPos[0] < 0 or newHeadPos[0] >= self._width or newHeadPos[1] < 0 or newHeadPos[1] >= self._height:
+        if snakeBiteHimself:
             return False
+        elif newHeadPos[0] < 0 or newHeadPos[0] >= self._width or newHeadPos[1] < 0 or newHeadPos[1] >= self._height:
+            if self.border:
+                return False
+            else:
+                if newHeadPos[0] < 0:
+                    newHeadPos[0] = self._width-1
+                if newHeadPos[0] >= self._width:
+                    newHeadPos[0] = 0
+                if newHeadPos[1] < 0:
+                    newHeadPos[1] = self._height-1
+                if newHeadPos[1] >= self._height:
+                    newHeadPos[1] = 0
+                self.body[0] = (newHeadPos[0], newHeadPos[1])
+            
+        self.startedMoving = True
         return True
 
     # return head pos
@@ -72,15 +125,28 @@ class Snake:
             if self._lastRemoved != None:
                 self.body.append(self._lastRemoved)
                 self._lastRemoved = None
-            elif len(self.body) ==1 or not self._addPartWithEnd():
-                self._addPartWithMove(move)
+            elif len(self.body) == 1 or not self._addPartWithEnd():
+                if not self._addPartWithMove(move):
+                    return False
+        return True
 
     # add part in snake's body according to a movement
     def _addPartWithMove(self, move):
-        newPart = (self.body[-1][0] - move[0], self.body[-1][1] - move[1])
+        newPart = [self.body[-1][0] - move[0], self.body[-1][1] - move[1]]
         if newPart[0] < 0 or newPart[0] >= self._width or newPart[1] < 0 or newPart[1] >= self._height:
-            return False
-        self.body.append(newPart)
+            if self.border:
+                return False
+            else:
+                if newPart[0] < 0:
+                    newPart[0] = self._width-1
+                if newPart[0] >= self._width:
+                    newPart[0] = 0
+                if newPart[1] < 0:
+                    newPart[1] = self._height-1
+                if newPart[1] >= self._height:
+                    newPart[1] = 0
+
+        self.body.append((newPart[0], newPart[1]))
         return True
     
     # add part in snake's body according to the end of the snake's body

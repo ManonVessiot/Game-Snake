@@ -1,5 +1,5 @@
 # SnakeGame_py
 
 Bugs :
-    - problème detection touches (de temps en temps ca ne marche plus)
+    - len(snake) = 2 mais seulement tete afficher au debut (peut etre tete = queue)
     -

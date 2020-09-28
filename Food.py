@@ -21,7 +21,7 @@ class Food:
         while isSnake:
             x = random.randrange(0, self._width)
             y = random.randrange(0, self._height)
-            if not self._snake.isSnake(x, y) and (x, y) not in self.positions:
+            if not self._snake.isSnake(x, y, False) and (x, y) not in self.positions:
                 isSnake = False
 
         self._foodNumberSinceStart += 1
@@ -32,7 +32,9 @@ class Food:
     def _createScore(self):
         mini = 3
         maxi = 10
-        return random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
+        score = random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
+        print("new score created : " + str(score))
+        return score
 
     # snake try to eat where his head is
     def eatFood(self, x, y):
