@@ -31,7 +31,6 @@ def moveEvents(game, drawer, secs):
                     game.changeMoveOfSnake(Move.Movement.DOWN)
                 elif event.key == keyboard.Key.backspace:
                     print("reset")
-                    game.reset()
                     drawer.reset()
                 elif event.key == keyboard.Key.esc:
                     print("stop")

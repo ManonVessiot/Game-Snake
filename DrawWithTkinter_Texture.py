@@ -1,4 +1,5 @@
-from tkinter import Tk, Canvas
+from tkinter import *
+from tkinter.ttk import *
 from PIL import ImageTk
 from PIL import Image
 import random
@@ -37,11 +38,24 @@ class DrawWithTkinter_Texture:
             self.heiht += 2 * posSize
             self.width += 2 * posSize
 
-        self.fen.geometry(str(self.width) + "x" + str(self.heiht))
+        self.buttonHeight = 30
+
+        self.fen.geometry(str(max(self.width, 180)) + "x" + str(self.heiht + self.buttonHeight))
+        self.fen.configure(bg='white')
 
         self.canvas = Canvas(self.fen, width=self.width, height=self.heiht)
+        self.canvasButton = Canvas(self.fen, width=self.width, height=self.buttonHeight)
+
+        style = Style() 
+        style.configure('Quit.TButton', font = ('calibri', 10, 'bold'), foreground = 'red') 
+        style.configure('Retry.TButton', font = ('calibri', 10, 'bold'), foreground = 'green') 
+
+        Button(self.canvasButton, text ="Quit", style = 'Quit.TButton', command = self.game.stop).pack(side="right")
+        Button(self.canvasButton, text ="Retry", style = 'Retry.TButton', command = self.reset).pack(side="left")
+        self.canvasButton.pack(side="bottom")
 
     def reset(self):
+        self.game.reset()
         self.reseting = True
 
     def run(self):
