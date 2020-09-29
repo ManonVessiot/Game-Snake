@@ -275,5 +275,6 @@ class DrawWithTkinter_Texture:
         elif self.game.move.move == Move.Movement.LEFT:
             return 3
         else:
+            print("stateOfSnake ???????????")
             return 0
 

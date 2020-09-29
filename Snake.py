@@ -125,7 +125,7 @@ class Snake:
             elif len(self.body) == 1 or not self._addPartWithEnd():
                 part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
                 partAdded = False
-                while not partAdded and len(part2Move) > 0:
+                while not partAdded and len(part2Move) > 1:
                     partAdded = self._addPartWithMove(move)
                     if not partAdded:
                         part2Move.remove(move)
