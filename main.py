@@ -17,7 +17,9 @@ def moveEvents(game, drawer, secs):
         # The event listener will be running in this block
         with keyboard.Events() as events:
             # Block at most one second
+            print("before event")
             event = events.get(secs * 100)
+            print("after event")
             if event is not None and isinstance(event, keyboard.Events.Press):
                 if event.key == keyboard.Key.left:
                     game.changeMoveOfSnake(Move.Movement.LEFT)
@@ -34,6 +36,10 @@ def moveEvents(game, drawer, secs):
                 elif event.key == keyboard.Key.esc:
                     print("stop")
                     game.stop()
+                else:
+                    print("event.key : " + str(event.key))
+            print("end event")
+
     print("stop moveEvents")
 
 # stop program
