@@ -1,4 +1,4 @@
-# SnakeGame_py
+# SnakeGame
 
 Bugs :
     - pb de touche : de temps en temps detecte plus les touches (obligé d'arrêter et de redémarrer)
