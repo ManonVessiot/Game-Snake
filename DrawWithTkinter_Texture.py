@@ -19,7 +19,7 @@ class DrawWithTkinter_Texture:
         self.grass = "grass.png"
         self.grassTexture = None
 
-        self.food = ["Foods/food2.png", "Foods/food3.png", "Foods/food4.png"]
+        self.food = ["Foods/food1.png", "Foods/food2.png", "Foods/food3.png", "Foods/food4.png", "Foods/food5.png", "Foods/food6.png"]
         self.foodTexture = []
 
         self.rock = ["Rocks/rock1.png", "Rocks/rock2.png", "Rocks/rock3.png", "Rocks/rock4.png"]
@@ -96,8 +96,10 @@ class DrawWithTkinter_Texture:
         if self.game.border:
             for line in range(self.game.height + 2):
                 if line == 0 or line == self.game.height + 1:
-                    for column in range(self.game.width + 2):
+                    column = 0
+                    while column < self.game.width + 2:
                         self.rocksIndex.append(random.randrange(0, len(self.rockTexture)))
+                        column +=1
                 else:
                     self.rocksIndex.append(random.randrange(0, len(self.rockTexture)))
                     self.rocksIndex.append(random.randrange(0, len(self.rockTexture)))

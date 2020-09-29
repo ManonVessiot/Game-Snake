@@ -37,9 +37,9 @@ class Food:
 
     # create score or food
     def _createScore(self):
-        mini = 1
-        maxi = max( min(self._width, self._height), mini) + 1
-        score = random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
+        #mini = 1
+        #maxi = max( min(self._width, self._height), mini) + 1
+        #score = random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
         #return score
         return 1
 
