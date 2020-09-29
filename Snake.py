@@ -16,12 +16,11 @@ class Snake:
         y = random.randrange(0, height)
         self.body = [(x, y)]
         part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-        partAdded = False
-        while not partAdded:
-            i = random.randrange(0, len(part2Move))
-            partAdded = self.addPArt(part2Move[i], 1)
-            if not partAdded:
-                part2Move.remove(part2Move[i])
+        i = random.randrange(0, len(part2Move))
+        partAdded = self.addPArt(part2Move[i], 1)
+        print("partAdded : " + str(partAdded))
+
+        print("Snake.body : " + str(self.body))
 
 
     # check if pos is a snake part
@@ -87,6 +86,15 @@ class Snake:
         snakeBiteHimself = False
 
         newHeadPos = [self.body[0][0] + movement[0], self.body[0][1] + movement[1]]
+        if not self.border:
+            if newHeadPos[0] < 0:
+                newHeadPos[0] = self._width-1
+            if newHeadPos[0] >= self._width:
+                newHeadPos[0] = 0
+            if newHeadPos[1] < 0:
+                newHeadPos[1] = self._height-1
+            if newHeadPos[1] >= self._height:
+                newHeadPos[1] = 0
         
         if (newHeadPos[0], newHeadPos[1]) in self.body[:-1]:
             snakeBiteHimself = True
@@ -96,19 +104,8 @@ class Snake:
 
         if snakeBiteHimself:
             return False
-        elif newHeadPos[0] < 0 or newHeadPos[0] >= self._width or newHeadPos[1] < 0 or newHeadPos[1] >= self._height:
-            if self.border:
-                return False
-            else:
-                if newHeadPos[0] < 0:
-                    newHeadPos[0] = self._width-1
-                if newHeadPos[0] >= self._width:
-                    newHeadPos[0] = 0
-                if newHeadPos[1] < 0:
-                    newHeadPos[1] = self._height-1
-                if newHeadPos[1] >= self._height:
-                    newHeadPos[1] = 0
-                self.body[0] = (newHeadPos[0], newHeadPos[1])
+        elif self.border and (newHeadPos[0] < 0 or newHeadPos[0] >= self._width or newHeadPos[1] < 0 or newHeadPos[1] >= self._height):
+            return False
             
         self.startedMoving = True
         return True
@@ -126,7 +123,15 @@ class Snake:
                 self.body.append(self._lastRemoved)
                 self._lastRemoved = None
             elif len(self.body) == 1 or not self._addPartWithEnd():
-                if not self._addPartWithMove(move):
+                part2Move = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+                partAdded = False
+                while not partAdded and len(part2Move) > 0:
+                    partAdded = self._addPartWithMove(move)
+                    if not partAdded:
+                        part2Move.remove(move)
+                        i = random.randrange(0, len(part2Move))
+                        move = part2Move[i]
+                if not partAdded:
                     return False
         return True
 
@@ -145,6 +150,9 @@ class Snake:
                     newPart[1] = self._height-1
                 if newPart[1] >= self._height:
                     newPart[1] = 0
+
+        if (newPart[0], newPart[1]) in self.body:
+            return False
 
         self.body.append((newPart[0], newPart[1]))
         return True

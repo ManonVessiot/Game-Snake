@@ -48,6 +48,9 @@ class SnakeGame:
         self.playing = False
 
     def reset(self):
+        self.move = Move()
+        time.sleep(self.secs)
+        
         self.buildGrid()
         
         self.move = Move()

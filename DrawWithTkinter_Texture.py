@@ -158,7 +158,11 @@ class DrawWithTkinter_Texture:
     def drawFood(self, x, y):
         xCorner = x * self.posSize
         yCorner = y * self.posSize
-        index = self.game.food.scores[self.game.food.positions.index((x-1, y-1))] % len(self.foodTexture)
+        borderLimit = 0
+        if self.game.border:
+            borderLimit = 1
+
+        index = self.game.food.scores[self.game.food.positions.index((x-borderLimit, y-borderLimit))] % len(self.foodTexture)
         self.canvas.create_image(xCorner, yCorner, image = self.foodTexture[index], anchor = "nw")
 
     def drawEmpty(self, x, y):
