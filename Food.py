@@ -30,11 +30,12 @@ class Food:
 
     # create score or food
     def _createScore(self):
-        mini = 3
-        maxi = 10
+        mini = 1
+        maxi = max( min(self._width, self._height), mini) + 1
         score = random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
         print("new score created : " + str(score))
-        return score
+        #return score
+        return 1
 
     # snake try to eat where his head is
     def eatFood(self, x, y):
