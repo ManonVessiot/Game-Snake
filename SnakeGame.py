@@ -100,7 +100,6 @@ class SnakeGame:
             scoreFood = self.food.eatFood(head[0], head[1])
             if scoreFood > 0:
                 self.score += 1
-                print("scoreFood : " + str(scoreFood))
                 self.snake.addPArt(movement, scoreFood)
 
             return True

@@ -2,6 +2,7 @@ from tkinter import Tk, Canvas
 from PIL import ImageTk
 from PIL import Image
 import random
+import math
 from Move import Move
 
 # draw snake game in console
@@ -18,7 +19,7 @@ class DrawWithTkinter_Texture:
         self.grass = "grass.png"
         self.grassTexture = None
 
-        self.food = ["Foods/food2.png"]
+        self.food = ["Foods/food2.png", "Foods/food3.png", "Foods/food4.png"]
         self.foodTexture = []
 
         self.rock = ["Rocks/rock1.png", "Rocks/rock2.png", "Rocks/rock3.png", "Rocks/rock4.png"]
@@ -162,7 +163,7 @@ class DrawWithTkinter_Texture:
         if self.game.border:
             borderLimit = 1
 
-        index = self.game.food.scores[self.game.food.positions.index((x-borderLimit, y-borderLimit))] % len(self.foodTexture)
+        index = (self.game.food.randomNum + int(math.tan(self.game.food.numbers[self.game.food.positions.index((x-borderLimit, y-borderLimit))]))) % len(self.foodTexture)
         self.canvas.create_image(xCorner, yCorner, image = self.foodTexture[index], anchor = "nw")
 
     def drawEmpty(self, x, y):

@@ -3,6 +3,7 @@ import random
 # mange food in grid
 
 class Food:
+
     # constructor
     def __init__(self, width, height, snake):
         self._width = width
@@ -13,6 +14,11 @@ class Food:
 
         self.positions = []
         self.scores = []
+
+        self.numbers = []
+
+        self.randomNum = random.randint(0, 1000)
+
         self._createFood()
 
     # create food
@@ -26,6 +32,7 @@ class Food:
 
         self._foodNumberSinceStart += 1
         self.positions.append((x, y))
+        self.numbers.append(self._foodNumberSinceStart)
         self.scores.append(self._createScore())
 
     # create score or food
@@ -33,7 +40,6 @@ class Food:
         mini = 1
         maxi = max( min(self._width, self._height), mini) + 1
         score = random.randrange(mini, max(mini + 1, maxi - self._foodNumberSinceStart))
-        print("new score created : " + str(score))
         #return score
         return 1
 
@@ -43,7 +49,8 @@ class Food:
         if self.isFood(x, y):
             i = self.positions.index((x, y))
             score = self.scores[i]
-            self.positions.remove((x, y))
+            self.positions = self.positions[:i] + self.positions[i+1:]
+            self.numbers = self.numbers[:i] + self.numbers[i+1:]
             self.scores = self.scores[:i] + self.scores[i+1:]
             self._createFood()
         return score

@@ -15,11 +15,11 @@ from DrawWithTkinter_Texture import DrawWithTkinter_Texture
 def moveEvents(game, drawer, secs):
     while game.playing:
         # The event listener will be running in this block
+        print("game.playing : " + str(game.playing))
         with keyboard.Events() as events:
             # Block at most one second
             print("before event")
             event = events.get(secs * 100)
-            print("after event")
             if event is not None and isinstance(event, keyboard.Events.Press):
                 if event.key == keyboard.Key.left:
                     game.changeMoveOfSnake(Move.Movement.LEFT)
