@@ -15,7 +15,7 @@ class DrawWithTkinter_Texture:
         self.posSize = posSize
         self.secs = int(secs * 250)
         self.reseting = False
-        self.path = "/home/manon/Documents/Projects/MyProjects/SnakeGame_py/img/"
+        self.path = "/home/manon/Documents/Projects/MyProjects/py_SnakeGame/img/"
 
         self.grass = "grass.png"
         self.grassTexture = None
