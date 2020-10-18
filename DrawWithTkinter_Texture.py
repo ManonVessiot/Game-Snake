@@ -1,5 +1,5 @@
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import Tk, Canvas
+from tkinter.ttk import Style, Button
 from PIL import ImageTk
 from PIL import Image
 import random

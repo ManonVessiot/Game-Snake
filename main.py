@@ -15,10 +15,8 @@ from DrawWithTkinter_Texture import DrawWithTkinter_Texture
 def moveEvents(game, drawer, secs):
     while game.playing:
         # The event listener will be running in this block
-        print("game.playing : " + str(game.playing))
         with keyboard.Events() as events:
             # Block at most one second
-            print("before event")
             event = events.get(secs * 100)
             if event is not None and isinstance(event, keyboard.Events.Press):
                 if event.key == keyboard.Key.left:
@@ -37,7 +35,6 @@ def moveEvents(game, drawer, secs):
                     game.stop()
                 else:
                     print("event.key : " + str(event.key))
-            print("end event")
 
     print("stop moveEvents")
 
@@ -52,12 +49,13 @@ def stopProgram():
 
 def format():
     print("\nWrong use !")
-    print("python3 main.py width height secs border drawMode (posSize)")
+    print("python3 main.py width height secs drawMode border (posSize)")
     print("   - width, height : size of game in number of cells")
     print("   - secs : seconds between frame")
     print("   - drawMode :")
     print("      - 0 : interface in console")
     print("      - 1 : interface with tkinter")
+    print("      - 2 : interface with tkinter and textures")
     print("   - border :")
     print("      - 0 : snake can go to the right area by passing by the left side")
     print("      - 1 : border kill snake")
